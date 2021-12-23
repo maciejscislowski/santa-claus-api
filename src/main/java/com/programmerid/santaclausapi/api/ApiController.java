@@ -3,11 +3,15 @@ package com.programmerid.santaclausapi.api;
 import com.programmerid.santaclausapi.application.LetterStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolationException;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -34,5 +38,10 @@ public class ApiController {
         log.info("Query for a letter with uuid {}", uuid);
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(
                 LetterToSantaView.fromLetter(store.findLetter(uuid))));
+    }
+
+    @ExceptionHandler
+    public Map<String, String> constraintViolation(ConstraintViolationException ex) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getCause());
     }
 }
